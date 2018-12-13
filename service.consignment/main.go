@@ -17,6 +17,7 @@ const (
 // IRepository defines Repository interface.
 type IRepository interface {
 	Create(*pb.Consignment) (*pb.Consignment, error)
+	GetAll() []*pb.Consignment
 }
 
 // Repository - Dummy repository, this simulates the use oa a datastroe
@@ -30,6 +31,11 @@ func (repo *Repository) Create(consignement *pb.Consignment) (*pb.Consignment, e
 	updated := append(repo.consignements, consignement)
 	repo.consignements = updated
 	return consignement, nil
+}
+
+// GetAll returns all consignments.
+func (repo *Repository) GetAll() []*pb.Consignment {
+	return repo.consignements
 }
 
 // service should implement all the methods to satisfy the service we defined in our
@@ -50,6 +56,12 @@ func (s *service) CreateConsignment(ctx context.Context, req *pb.Consignment) (*
 
 	// Return matching the `Response` message we created in our protobuf definition.
 	return &pb.Response{Created: true, Consignment: consignment}, nil
+}
+
+func (s *service) GetConsignments(ctx context.Context, req *pb.GetRequest) (*pb.Response, error) {
+	// consignments := s.repo.GetAll()
+	consignments := s.repo.GetAll()
+	return &pb.Response{Consignments: consignments}, nil
 }
 
 func main() {
