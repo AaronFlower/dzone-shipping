@@ -23,6 +23,7 @@ message Container {
     string user_id = 4;
 }
 
+// 大而全的返回，在实现时不一定每个字段都返回.
 message Response {
     bool created = 1;
     Consignment consignment = 2;

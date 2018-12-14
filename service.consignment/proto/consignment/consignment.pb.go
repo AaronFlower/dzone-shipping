@@ -156,6 +156,7 @@ func (m *Container) GetUserId() string {
 	return ""
 }
 
+// 大而全的返回，在实现时不一定每个字段都返回.
 type Response struct {
 	Created              bool           `protobuf:"varint,1,opt,name=created,proto3" json:"created,omitempty"`
 	Consignment          *Consignment   `protobuf:"bytes,2,opt,name=consignment,proto3" json:"consignment,omitempty"`
