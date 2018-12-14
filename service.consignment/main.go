@@ -67,7 +67,8 @@ func (s *service) GetConsignments(ctx context.Context, req *pb.GetRequest) (*pb.
 func main() {
 	repo := &Repository{}
 
-	// Set-up our gRPC server.
+	// 创建一个监听接口。golang 是用核心库 net, net/http 来作网络通信的。所以端口都是这两个库来创建。
+	// gRPC 是用 golang 实现的一个 RPC 库而已，没有监听端口的功能，只能为该端口提供服务。
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -81,6 +82,8 @@ func main() {
 
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
+
+	// gPRC 创建的服务指定在那个端口进行服务.
 	if err := s.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
