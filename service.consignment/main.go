@@ -13,27 +13,27 @@ const (
 	port = ":50051"
 )
 
-// IRepository defines Repository interface.
-type IRepository interface {
+// Repository defines Repository interface.
+type Repository interface {
 	Create(*pb.Consignment) (*pb.Consignment, error)
 	GetAll() []*pb.Consignment
 }
 
-// Repository - Dummy repository, this simulates the use oa a datastroe
+// ConsignmentRepository - Dummy repository, this simulates the use oa a datastroe
 // of some kind. We'll replace this with a real implementation later on.
-type Repository struct {
+type ConsignmentRepository struct {
 	consignements []*pb.Consignment
 }
 
 // Create creates a consignment
-func (repo *Repository) Create(consignement *pb.Consignment) (*pb.Consignment, error) {
+func (repo *ConsignmentRepository) Create(consignement *pb.Consignment) (*pb.Consignment, error) {
 	updated := append(repo.consignements, consignement)
 	repo.consignements = updated
 	return consignement, nil
 }
 
 // GetAll returns all consignments.
-func (repo *Repository) GetAll() []*pb.Consignment {
+func (repo *ConsignmentRepository) GetAll() []*pb.Consignment {
 	return repo.consignements
 }
 
@@ -41,7 +41,7 @@ func (repo *Repository) GetAll() []*pb.Consignment {
 // protobuf definition. You can check the interface in the generated code itself for
 // the exact method signatures etc to give you a better idea.
 type service struct {
-	repo         IRepository
+	repo         Repository
 	vesselClient vesselProto.VesselServiceClient
 }
 
@@ -80,7 +80,7 @@ func (s *service) GetConsignments(ctx context.Context, req *pb.GetRequest, res *
 }
 
 func main() {
-	repo := &Repository{}
+	repo := &ConsignmentRepository{}
 
 	srv := micro.NewService(
 		// This name must match the package name given in your protobuf definition.

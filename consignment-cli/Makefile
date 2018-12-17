@@ -5,5 +5,5 @@ run:
 	docker run -e MICRO_REGISTRY=mdns consignment-cli
 
 clean:
-	go clean -i -n
+	go clean
 
