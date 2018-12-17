@@ -5,6 +5,7 @@ import (
 	"log"
 
 	pb "github.com/aaronflower/dzone-shipping/service.consignment/proto/consignment"
+	vesselProto "github.com/aaronflower/dzone-shipping/service.vessel/proto/vessel"
 	micro "github.com/micro/go-micro"
 )
 
@@ -40,12 +41,25 @@ func (repo *Repository) GetAll() []*pb.Consignment {
 // protobuf definition. You can check the interface in the generated code itself for
 // the exact method signatures etc to give you a better idea.
 type service struct {
-	repo IRepository
+	repo         IRepository
+	vesselClient vesselProto.VesselServiceClient
 }
 
 // CreateConsignment - we created just one method on our service, which is a create method,
 // which takes a context and a request as an argument, these are handled by the gRPC server.
 func (s *service) CreateConsignment(ctx context.Context, req *pb.Consignment, res *pb.Response) error {
+	vesselResponse, err := s.vesselClient.FindAvailable(context.Background(), &vesselProto.Specification{
+		MaxWeight: req.Weight,
+		Capacity:  int32(len(req.Containers)),
+	})
+
+	log.Printf("Found vessel: %s", vesselResponse.Vessel.Name)
+	if err != nil {
+		return err
+	}
+
+	req.VesselId = vesselResponse.Vessel.Id
+
 	// Save our consignment
 	consignment, err := s.repo.Create(req)
 	if err != nil {
@@ -76,9 +90,11 @@ func main() {
 	// Init will parse the command line flags.
 	srv.Init()
 
+	vesselClient := vesselProto.NewVesselServiceClient("go.micro.srv.vessel", srv.Client())
+
 	// Register our service with the gRPC server, this will tie our implementation into
 	// the auto-generated interface code for our portobuf definition.
-	pb.RegisterShippingServiceHandler(srv.Server(), &service{repo})
+	pb.RegisterShippingServiceHandler(srv.Server(), &service{repo, vesselClient})
 
 	if err := srv.Run(); err != nil {
 		log.Fatalf("Failed to serve: %v", err)

@@ -6,7 +6,7 @@
 FROM golang:1.11 as builder
 
 # Set out workdir to our current service in the gopath
-WORKDIR /go/src/github.com/aaronflower/dzone-shipping/service.consignment
+WORKDIR /go/src/github.com/aaronflower/dzone-shipping/service.vessel
 
 # Copy the current code into our workdir
 COPY . .
@@ -14,8 +14,9 @@ COPY . .
 # Here we're pulling in godep, which is a dependency manager tool,
 # we're going to use dep instead of go get, to get around a few
 # quirks in how go get works with sub-packages.
+# RUN go get -u github.com/golang/dep/cmd/dep
 # RUN go get -u -v github.com/golang/dep/cmd/dep
-# RUN dep init -v && dep ensure -v
+# RUN dep -v init && dep -v ensure
 
 # Build the binary, with a few flags which will allow us to run this binary in Alpine.
 # RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo .
@@ -25,7 +26,7 @@ COPY . .
 FROM alpine:latest
 
 # Security related package, good to have.
-RUN apk --no-cache add ca-certificates
+# RUN apk --no-cache add ca-certificates
 
 # Same as before, create a directory for our app.
 RUN mkdir /app
@@ -34,10 +35,9 @@ WORKDIR /app
 # Here, instead of copying the binary from our host machine, we pull the binary from
 # the container name `builder`, within this build context. This reaches into our previous
 # image, finds the binary we built, and pulls it into this container. Amazing.
-# COPY --from=builder /go/src/github.com/aaronflower/dzone-shipping/service.consignment .
-COPY ./service.consignment .
+# COPY --from=builder /go/src/github.com/aaronflower/dzone-shipping/service.vessel .
+COPY service.vessel .
 
 # Run the binary as per usual! This time with a binary build in a separate container,
 # with all of the correct dependencies and runtime libraries.
-CMD ["./service.consignment"]
-
+CMD ["./service.vessel"]
