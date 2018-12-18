@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	defaultHost = "localhost:27071"
+	defaultHost = "localhost:27017"
 )
 
 func createDummyData(repo Repository) {
@@ -31,6 +31,7 @@ func main() {
 
 	session, err := CreateSession(host)
 	defer session.Close()
+
 	if err != nil {
 		log.Fatalf("Error connecting to datastore: %v", err)
 	}
